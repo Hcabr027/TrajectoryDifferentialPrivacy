@@ -7,7 +7,7 @@ from sklearn.cluster import DBSCAN
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
-import glob
+import similaritymeasures
 import os
 
 
@@ -127,19 +127,22 @@ def frechet_dist(traj1, traj2):
     return ca[m-1, n-1]
 
 
-def compute_distance_matrix(traj_df, eps):
-    traj_list = []
-    for traj_num in traj_df['traj_num'].unique():
-        traj_points = traj_df.loc[traj_df['traj_num'] == traj_num, ['x', 'y']].values
-        traj_list.append(traj_points)
-    dist_matrix = np.zeros((len(traj_list), len(traj_list)))
-    for i in range(len(traj_list)):
-        for j in range(i + 1, len(traj_list)):
-            dist = frechet_dist(traj_list[i], traj_list[j])
-            if dist <= eps:
-                dist_matrix[i, j] = dist
-                dist_matrix[j, i] = dist
-    return dist_matrix
+def compute_distance_matrix(trajectories, method="Frechet"):
+    """
+    :param method: "Frechet" or "Area"
+    """
+    n = len(trajectories)
+    dist_m = np.zeros((n, n))
+    for i in range(n - 1):
+        p = trajectories[i]
+        for j in range(i + 1, n):
+            q = trajectories[j]
+            if method == "Frechet":
+                dist_m[i, j] = similaritymeasures.frechet_dist(p, q)
+            else:
+                dist_m[i, j] = similaritymeasures.area_between_two_curves(p, q)
+            dist_m[j, i] = dist_m[i, j]
+    return dist_m
 
 
 #traj_dir = './'  # replace with actual path
@@ -165,4 +168,23 @@ trajectory_33 = np.loadtxt('traj_33.txt', delimiter=';', usecols=(0, 1), skiprow
 noisy_trajectory_33 = add_laplace(trajectory_33, 300)
 
 np.savetxt('noisy_trajectory_33.csv', noisy_trajectory_33, delimiter=',', header=header, comments='')
-plot_trajectories(trajectory_33, noisy_trajectory_33)
+#plot_trajectories(trajectory_33, noisy_trajectory_33)
+
+
+# traj_1 = simplified_traj_df[simplified_traj_df['traj_num']==1]
+# traj_2 = simplified_traj_df[simplified_traj_df['traj_num']==2]
+
+
+# group the DataFrame by the 'traj_num' column and convert each group to a list of tuples
+df = simplified_traj_df
+# group the DataFrame by the 'traj_num' column and create a list of (lat, lon) tuples for each group
+groups = df.groupby('traj_num').apply(lambda x: list(zip(x['y'], x['x']))).tolist()
+
+# print the resulting list of trajectories
+print(groups[0])
+# compute the distance matrix for the trajectories
+
+
+# print the resulting distance matrix
+#print(dist_m)
+
