@@ -1,38 +1,40 @@
 import math
+import os
 
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import KMeans
+
+import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.cluster import DBSCAN
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.cluster import DBSCAN
 import similaritymeasures
-import os
 
 
 def add_laplace(trajectory, epsilon):
-    noise = np.random.laplace(scale=1 / epsilon, size=np.vstack(trajectory).shape)
+    noise = np.random.laplace(
+        scale=1 / epsilon, size=np.vstack(trajectory).shape)
     noisy_trajectory = np.vstack(trajectory) + noise
     return noisy_trajectory
-# 
-# 
+#
+#
 # def cluster_trajectories(trajectory, k):
 #     kmeans = KMeans(n_clusters=k, random_state=0).fit(trajectory)
 #     return kmeans.labels_
-# 
-# 
+#
+#
 # def add_noise_and_cluster(trajectory, epsilon, k):
 #     noisy_trajectory = add_laplace(trajectory, epsilon)
 #     labels = cluster_trajectories(noisy_trajectory, k)
 #     label_colors = pd.Series(labels).map({0: 'orange', 1: 'yellow', 2: 'red', 3: 'purple', 4: 'green'})
-# 
+#
 #     noisy_trajectory_df = pd.DataFrame(
 #         {'Latitude': noisy_trajectory[:, 0], 'Longitude': noisy_trajectory[:, 1], 'Label': labels,
 #          'Color': label_colors})
 #     return label_colors, noisy_trajectory_df
-# 
-# 
+#
+#
 # def plot_trajectories(trajectory, noisy_trajectory_df, marker, label_color):
 #     fig, ax = plt.subplots(figsize=(20, 10))
 #     ax.plot(np.vstack(trajectory)[:, 0], np.vstack(trajectory)[:, 1], f'b{marker}-', label='Original')
@@ -45,21 +47,28 @@ def add_laplace(trajectory, epsilon):
 #     plt.show()
 # Plot the original and the noisy trajectory
 
+
 def plot_trajectories(trajectory, noisy_trajectory):
     fig, ax = plt.subplots(figsize=(20, 10))
-    ax.plot(np.vstack(trajectory)[:, 0], np.vstack(trajectory)[:, 1], 'b.-', label='Original')
-    ax.plot(noisy_trajectory[:, 0], noisy_trajectory[:, 1], 'r.-', label='Noisy')
+    ax.plot(np.vstack(trajectory)[:, 0], np.vstack(
+        trajectory)[:, 1], 'b.-', label='Original')
+    ax.plot(noisy_trajectory[:, 0],
+            noisy_trajectory[:, 1], 'r.-', label='Noisy')
     ax.set_title('Original vs. Noisy Trajectory')
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
     ax.legend()
     plt.show()
 
+
 traj_dir = './'  # directory where the trajectories are stored
+
+
 def read_trajectories():
     for traj_num in range(1, 201):
-        traj_file = os.path.join(traj_dir, f"traj_{traj_num}.txt")
-        traj = pd.read_table(traj_file, header=None, delimiter=';', skiprows=1)  # skip the first row
+        traj_file = os.path.join(traj_dir, f"in/traj_{traj_num}.txt")
+        traj = pd.read_table(traj_file, header=None,
+                             delimiter=';', skiprows=1)  # skip the first row
         traj['traj_num'] = traj_num  # add a column with the trajectory number
         yield traj
 
@@ -70,23 +79,25 @@ traj_df = pd.concat(read_trajectories(), ignore_index=True)
 print(traj_df)
 
 
-
 def rdp_with_index(points, indices, epsilon):
     """rdp with returned point indices
     """
     dmax, index = 0.0, 0
     for i in range(1, len(points) - 1):
         d = point_line_distance(points[i], points[0], points[-1])
-        #print(f"i={i}, d={d}, dmax={dmax}, index={index}")  # add this line
+        # print(f"i={i}, d={d}, dmax={dmax}, index={index}")  # add this line
         if d > dmax:
             dmax, index = d, i
     if dmax >= epsilon:
-        first_points, first_indices = rdp_with_index(points[:index + 1], indices[:index + 1], epsilon)
-        second_points, second_indices = rdp_with_index(points[index:], indices[index:], epsilon)
+        first_points, first_indices = rdp_with_index(
+            points[:index + 1], indices[:index + 1], epsilon)
+        second_points, second_indices = rdp_with_index(
+            points[index:], indices[index:], epsilon)
         results = np.concatenate((first_points[:-1], second_points))
         results_indices = np.concatenate((first_indices[:-1], second_indices))
     else:
-        results, results_indices = np.array([points[0], points[-1]]), np.array([indices[0], indices[-1]])
+        results, results_indices = np.array(
+            [points[0], points[-1]]), np.array([indices[0], indices[-1]])
     return results, results_indices
 
 
@@ -110,14 +121,17 @@ def point_line_distance(point, start, end):
     distance = math.sqrt(dx * dx + dy * dy)
     return distance
 
+
 def frechet_dist(traj1, traj2):
     m, n = len(traj1), len(traj2)
     ca = np.zeros((m, n))
     ca[0, 0] = point_line_distance(traj1[0], traj2[0], traj2[-1])
     for i in range(1, m):
-        ca[i, 0] = max(ca[i-1, 0], point_line_distance(traj1[i], traj2[0], traj2[-1]))
+        ca[i, 0] = max(
+            ca[i-1, 0], point_line_distance(traj1[i], traj2[0], traj2[-1]))
     for j in range(1, n):
-        ca[0, j] = max(ca[0, j-1], point_line_distance(traj1[0], traj2[j], traj2[-1]))
+        ca[0, j] = max(
+            ca[0, j-1], point_line_distance(traj1[0], traj2[j], traj2[-1]))
     for i in range(1, m):
         for j in range(1, n):
             ca[i, j] = max(
@@ -145,29 +159,34 @@ def compute_distance_matrix(trajectories, method="Frechet"):
     return dist_m
 
 
-#traj_dir = './'  # replace with actual path
+# traj_dir = './'  # replace with actual path
 
 simplified_trajs = []
 simplified_indices = []
 for traj in read_trajectories():
     traj_points = traj[[0, 1]].values
     traj_indices = np.arange(len(traj_points))
-    simplified_traj, simplified_index = rdp_with_index(traj_points, traj_indices, epsilon=1.0)
+    simplified_traj, simplified_index = rdp_with_index(
+        traj_points, traj_indices, epsilon=1.0)
     simplified_trajs.append(simplified_traj)
     simplified_indices.append(simplified_index)
 
 # Concatenate the simplified trajectories into a single DataFrame
-simplified_traj_df = pd.DataFrame(np.concatenate(simplified_trajs), columns=['x', 'y'])
-simplified_traj_df['traj_num'] = np.repeat(np.arange(1, 201), [len(s) for s in simplified_trajs])
+simplified_traj_df = pd.DataFrame(
+    np.concatenate(simplified_trajs), columns=['x', 'y'])
+simplified_traj_df['traj_num'] = np.repeat(
+    np.arange(1, 201), [len(s) for s in simplified_trajs])
 simplified_traj_df['index'] = np.concatenate(simplified_indices)
 
-#print(simplified_traj_df)
+# print(simplified_traj_df)
 
 header = 'lan,lon'
-trajectory_33 = np.loadtxt('traj_33.txt', delimiter=';', usecols=(0, 1), skiprows=2)
+trajectory_33 = np.loadtxt(
+    'in/traj_33.txt', delimiter=';', usecols=(0, 1), skiprows=2)
 noisy_trajectory_33 = add_laplace(trajectory_33, 300)
 
-np.savetxt('noisy_trajectory_33.csv', noisy_trajectory_33, delimiter=',', header=header, comments='')
+np.savetxt('out/noisy_trajectory_33.csv', noisy_trajectory_33,
+           delimiter=',', header=header, comments='')
 #plot_trajectories(trajectory_33, noisy_trajectory_33)
 
 
@@ -178,7 +197,8 @@ np.savetxt('noisy_trajectory_33.csv', noisy_trajectory_33, delimiter=',', header
 # group the DataFrame by the 'traj_num' column and convert each group to a list of tuples
 df = simplified_traj_df
 # group the DataFrame by the 'traj_num' column and create a list of (lat, lon) tuples for each group
-groups = df.groupby('traj_num').apply(lambda x: list(zip(x['y'], x['x']))).tolist()
+groups = df.groupby('traj_num').apply(
+    lambda x: list(zip(x['y'], x['x']))).tolist()
 
 # print the resulting list of trajectories
 print(groups[0])
@@ -186,5 +206,4 @@ print(groups[0])
 
 
 # print the resulting distance matrix
-#print(dist_m)
-
+# print(dist_m)
