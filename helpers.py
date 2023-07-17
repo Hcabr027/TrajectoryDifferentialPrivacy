@@ -98,16 +98,16 @@ def rdp_with_index(points, indices, epsilon):
     return results, results_indices
 
 
-def compute_distance_matrix(trajectories, method="Frechet"):
+def compute_distance_matrix(trajectories, method="Frechet", x_axis='x', y_axis='y'):
     """
     :param method: "Frechet" or "Area"
     """
     n = len(trajectories)
     dist_m = np.zeros((n, n))
     for i in range(n - 1):
-        p = trajectories[i]
+        p = trajectories[i][[x_axis, y_axis]].values
         for j in range(i + 1, n):
-            q = trajectories[j]
+            q = trajectories[j][[x_axis, y_axis]].values
             if method == "Frechet":
                 dist_m[i, j] = similaritymeasures.frechet_dist(p, q)
             else:
@@ -131,10 +131,16 @@ def add_laplace(trajectory, epsilon):
     noisy_trajectory = np.vstack(trajectory) + noise
     return noisy_trajectory
 
+
+def add_laplace_df(trajectory_df, epsilon):
+    noise = np.random.laplace(scale=1 / epsilon, size=trajectory_df.shape)
+    noisy_trajectory = trajectory_df + noise
+    return noisy_trajectory
+
 # Visualization functions
 
 
-def plot_trajectories(trajectory, noisy_trajectory, output_file_prefix=''):
+def plot_trajectories(trajectory, noisy_trajectory, output_file_prefix='', output_dir_path=''):
     fig, ax = plt.subplots()  # figsize=(20, 10))
     ax.plot(np.vstack(trajectory)[:, 0], np.vstack(
         trajectory)[:, 1], 'b.-', label='Original')
@@ -144,14 +150,14 @@ def plot_trajectories(trajectory, noisy_trajectory, output_file_prefix=''):
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
     ax.legend()
-    plt.savefig(output_dir + output_file_prefix + 'noisy_trajectory.pdf' , bbox_inches='tight')
+    plt.savefig(output_dir_path + output_file_prefix + 'noisy_trajectory.pdf' , bbox_inches='tight')
     plt.show()
 
 
-def plot_clustered_trajectories(traj_list, labels, x_col='x', y_col='y', title=None, output_file_prefix=''):
+def plot_clustered_trajectories(traj_list, labels, x_col='x', y_col='y', title=None, output_file_prefix='', output_dir_path=''):
     colors = {label: plt.cm.jet(i / len(set(labels))) for i, label in enumerate(set(labels))}
     fig, ax = plt.subplots()
-    
+
     for traj, label in zip(traj_list, labels):
         ax.plot(traj[x_col], traj[y_col], color=colors[label], linewidth=2)
 
@@ -164,85 +170,5 @@ def plot_clustered_trajectories(traj_list, labels, x_col='x', y_col='y', title=N
     # Create a custom legend for the clusters
     legend_elements = [Line2D([0], [0], color=colors[label], lw=2, label=f'Cluster {label}') for label in set(labels)]
     ax.legend(handles=legend_elements, loc='best')
-    plt.savefig(output_dir + output_file_prefix + 'clustered_trajectories.pdf' , bbox_inches='tight')
+    plt.savefig(output_dir_path + output_file_prefix + 'clustered_trajectories.pdf' , bbox_inches='tight')
     plt.show()
-
-
-# Data reading and preprocessing
-traj_dir = './in/'  # directory where the trajectories are stored
-output_dir = './out/'
-simplified_trajs = []
-simplified_indices = []
-num_trajectories = 200
-
-for traj_num in range(1, num_trajectories + 1):
-    traj_file = os.path.join(traj_dir, f"traj_{traj_num}.txt")
-    traj = pd.read_table(traj_file, delimiter=';')
-
-    traj_points = traj[['x', 'y']].values
-    traj_indices = np.arange(len(traj_points))
-    simplified_traj, simplified_index = rdp_with_index(traj_points, traj_indices, epsilon=1.0)
-
-    simplified_trajs.append(simplified_traj)
-    simplified_indices.append(simplified_index)
-
-simplified_traj_df = pd.DataFrame(np.concatenate(simplified_trajs), columns=['x', 'y'])
-simplified_traj_df['traj_num'] = np.repeat(np.arange(1, num_trajectories + 1), [len(s) for s in simplified_trajs])
-simplified_traj_df['index'] = np.concatenate(simplified_indices)
-
-print('simplified trajectories')
-print(simplified_traj_df)
-
-header = 'Latitude,Longitude'
-traj_file_name = "traj_2"
-traj_file = os.path.join(traj_dir, traj_file_name + '.txt')
-trajectory = np.loadtxt(traj_file, delimiter=';', usecols=(0, 1), skiprows=2)
-noisy_trajectory = add_laplace(trajectory, 300)
-output_file = os.path.join(output_dir, 'noisy_' + traj_file_name + '.csv')
-np.savetxt(output_file, noisy_trajectory, delimiter=',', header=header, comments='')
-# plot_trajectories(trajectory, noisy_trajectory)
-
-traj_1 = simplified_traj_df[simplified_traj_df['traj_num'] == 1]
-traj_2 = simplified_traj_df[simplified_traj_df['traj_num'] == 2]
-
-traj_list = [traj_1.copy(), traj_2.copy()]  # Create deep copies to avoid SettingWithCopyWarning
-
-# Add noisy x and y columns to each DataFrame in traj_list
-for traj in traj_list:
-    noisy_points = add_laplace(traj[['x', 'y']].values, 10)
-    traj['noisy_x'] = noisy_points[:, 0]
-    traj['noisy_y'] = noisy_points[:, 1]
-
-dist_m = compute_distance_matrix(traj_list)
-print('dist_m')
-print(dist_m)
-
-labels = clustering_by_dbscan(dist_m)
-print(labels)
-
-print(traj_list[0])
-
-# Call the function to plot the original and noisy clustered trajectories
-# plot_clustered_trajectories(traj_list, labels, x_col='x', y_col='y', title="Clustered Trajectories")
-# plot_clustered_trajectories(traj_list, labels, x_col='noisy_x', y_col='noisy_y', title="Clustered Noisy Trajectories", output_file_prefix='noisy_')
-
-print('all trajectories')
-
-# Group simplified_traj_df by 'traj_num' and create a list of DataFrames
-traj_list = [group.copy() for _, group in simplified_traj_df.groupby('traj_num')]
-
-# Add noisy x and y columns to each DataFrame in traj_list
-for traj in traj_list:
-    noisy_points = add_laplace(traj[['x', 'y']].values, 10)
-    traj['noisy_x'] = noisy_points[:, 0]
-    traj['noisy_y'] = noisy_points[:, 1]
-
-traj_list = traj_list[:20]
-# Compute distance matrix and perform clustering
-dist_m = compute_distance_matrix(traj_list)
-labels = clustering_by_dbscan(dist_m, 40)
-print(labels)
-
-# Call the function to plot the original and noisy clustered trajectories
-# plot_clustered_trajectories(traj_list, labels, x_col='x', y_col='y', title="Clustered Trajectories")
-plot_clustered_trajectories(traj_list, labels, x_col='noisy_x', y_col='noisy_y', title="Clustered Noisy Trajectories", output_file_prefix='all_noisy_')
