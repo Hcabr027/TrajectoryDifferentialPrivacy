@@ -33,7 +33,7 @@ def main():
 
     # Add noisy x and y columns to each DataFrame in trajectories_groups
     for traj in trajectories_groups:
-        noisy_points = hlp.add_laplace(traj[['Longitude', 'Latitude']].values, 10)
+        noisy_points = hlp.add_laplace(traj[['Longitude', 'Latitude']].values, 1000000)
         traj['noisy_x'] = noisy_points[:, 0]
         traj['noisy_y'] = noisy_points[:, 1]
 
@@ -41,7 +41,7 @@ def main():
 
     # Compute distance matrix and perform clustering
     dist_m = hlp.compute_distance_matrix(trajectories_groups, x_axis='Longitude', y_axis='Latitude')
-    labels = hlp.clustering_by_dbscan(dist_m, 40)
+    labels = hlp.cluster_trajectories_dbscan(dist_m, 0.0001)
     print('clusters without noise')
     print(labels)
 
@@ -52,7 +52,7 @@ def main():
 
     print('clusters with noise')
     dist_m = hlp.compute_distance_matrix(trajectories_groups, x_axis='noisy_x', y_axis='noisy_y')
-    labels = hlp.clustering_by_dbscan(dist_m, eps=1)
+    labels = hlp.cluster_trajectories_dbscan(dist_m, eps=0.0001)
     print('labels')
     print(labels)
     hlp. plot_clustered_trajectories(trajectories_groups, labels, x_col='noisy_x', y_col='noisy_y', title="Clustered Noisy Trajectories", output_file_prefix=prefix + '_noisy_', output_dir_path=OUTPUT_DIR)
