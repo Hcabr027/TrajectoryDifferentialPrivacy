@@ -84,8 +84,8 @@ def main():
     print(traj_list[0].to_string())
     print(traj_list[0].to_string())
 
-    hlp.plot_noisy_trajectory(traj_list[0], PREFIX + '_1_', OUTPUT_DIR)
-    hlp.plot_noisy_trajectory(traj_list[1], PREFIX + '_2_', OUTPUT_DIR)
+    hlp.plot_noisy_trajectory_on_map(traj_list[0], PREFIX + '_1_', OUTPUT_DIR)
+    hlp.plot_noisy_trajectory_on_map(traj_list[1], PREFIX + '_2_', OUTPUT_DIR)
 
     print('plot simplified trajectories')
     traj_1 = simplified_traj_df[simplified_traj_df['traj_num'] == 1]
@@ -110,8 +110,8 @@ def main():
     print(traj_list[0].to_string())
     print(traj_list[0].to_string())
 
-    hlp.plot_noisy_trajectory(traj_list[0], PREFIX + '_simplified_1_', OUTPUT_DIR)
-    hlp.plot_noisy_trajectory(traj_list[1], PREFIX + '_simplified_2_', OUTPUT_DIR)
+    hlp.plot_noisy_trajectory_on_map(traj_list[0], PREFIX + '_simplified_1_', OUTPUT_DIR)
+    hlp.plot_noisy_trajectory_on_map(traj_list[1], PREFIX + '_simplified_2_', OUTPUT_DIR)
 
     # Call the function to plot the original and noisy clustered trajectories
     print('all simplified trajectories')

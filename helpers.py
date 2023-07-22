@@ -5,8 +5,11 @@ from matplotlib.lines import Line2D
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+import cartopy
 import similaritymeasures
 
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -75,6 +78,37 @@ def plot_noisy_trajectory(traj, output_file_prefix='', output_dir_path=''):
     ax.set_ylabel('Latitude')
     ax.legend()
     plt.savefig(output_dir_path + output_file_prefix + 'noisy_trajectory.pdf' , bbox_inches='tight')
+    plt.show()
+
+
+def plot_noisy_trajectory_on_map(traj, output_file_prefix='', output_dir_path=''):
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
+
+    ax.add_feature(cartopy.feature.LAND)
+    ax.add_feature(cartopy.feature.OCEAN)
+    ax.add_feature(cartopy.feature.COASTLINE)
+    ax.add_feature(cartopy.feature.BORDERS, linestyle='-', alpha=.5)
+
+    # Plot the original trajectory
+    ax.plot(traj['x'], traj['y'], 'b.-', label='Original', transform=ccrs.PlateCarree())
+
+    # Plot the noisy trajectory
+    ax.plot(traj['noisy_x'], traj['noisy_y'], 'r.-', label='Noisy', transform=ccrs.PlateCarree())
+
+    # Set map limits and title
+    ax.set_extent([min(traj['x']), max(traj['x']), min(traj['y']), max(traj['y'])], crs=ccrs.PlateCarree())
+    ax.set_title('Original vs. Noisy Trajectory')
+
+    # Add map features (e.g., coastline, gridlines, etc.)
+    ax.coastlines()
+    ax.gridlines(draw_labels=True)
+
+    # Add legend
+    ax.legend()
+
+    # Save the plot to a file or show it
+    plt.savefig(output_dir_path + output_file_prefix + 'noisy_trajectory_map.png', bbox_inches='tight')
     plt.show()
 
 
