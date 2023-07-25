@@ -140,14 +140,14 @@ def main():
     print(labels)
 
     # Call the function to plot the original and noisy clustered trajectories
-    hlp.plot_clustered_trajectories(traj_list, labels, 'x', 'y', "Clustered Trajectories", PREFIX + '_', OUTPUT_DIR)
+    hlp.plot_clustered_trajectories_on_map(traj_list, labels, 'x', 'y', "Clustered Trajectories", PREFIX + '_', OUTPUT_DIR)
 
     print('clusters with noise')
     dist_m = hlp.compute_distance_matrix(traj_list, 'noisy_x', 'noisy_y')
     labels = hlp.cluster_trajectories_dbscan(dist_m, eps=.005)
     print('labels')
     print(labels)
-    hlp. plot_clustered_trajectories(traj_list, labels, 'noisy_x', 'noisy_y', "Clustered Noisy Trajectories", PREFIX + '_noisy_', OUTPUT_DIR)
+    hlp. plot_clustered_trajectories_on_map(traj_list, labels, 'noisy_x', 'noisy_y', "Clustered Noisy Trajectories", PREFIX + '_noisy_', OUTPUT_DIR)
 
 
 if __name__ == "__main__":
