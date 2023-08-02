@@ -1,6 +1,7 @@
 # Trajectory Privacy Preservation with Differential Privacy
 
 This repository contains Python scripts that implement trajectory privacy preservation techniques using differential privacy. The goal is to protect sensitive trajectory data while enabling useful analysis at a broader level.
+This code is part of the accompanying source code for the publication titled "Privacy-Preserving Multi-Agent Marine Data Collection via Differential Privacy" published to the Oceans 2023 Gulfcoast conference proceedings.
 
 ## Prerequisites
 
