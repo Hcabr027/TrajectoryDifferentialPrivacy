@@ -10,13 +10,13 @@ This repository contains Python scripts that implement trajectory privacy preser
 ## Note for Windows users:
 Installing GDAL and Cartopy packages on Windows is complicated, for higher chances of success please do the following:
 
-1. Download and install Visual C++ Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+1. Download and install Visual C++ Build Tools: `https://visualstudio.microsoft.com/visual-cpp-build-tools/`
    
-3. Download precompiled GDAL Wheel: https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
+3. Download precompiled GDAL Wheel: `https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal`
    
-5. Install GDAL wheel with PIP: pip install package-name.whl
+5. Install GDAL wheel with PIP: `pip install package-name.whl`
    
-7. Install Cartopy from github with PIP: pip install git+https://github.com/SciTools/cartopy
+7. Install Cartopy from github with PIP: `pip install git+https://github.com/SciTools/cartopy`
 
 
 ## Getting Started
