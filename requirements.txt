@@ -1,0 +1,9 @@
+matplotlib
+scikit-learn
+similaritymeasures
+shapely
+numpy
+pandas
+fastdtw
+cartopy
+GDAL
