@@ -47,12 +47,7 @@ Both scripts do the following:
 - Adjust the privacy parameter (epsilon) in the scripts to control the level of privacy protection.
 
 - Outputs Charts to the 'out' directory
-
-## Contributors
-
-- Cesar A. Rojas(https://github.com/croja022)
-- Heidys Cabrera(https://github.com/hcabr027)
-
+  
 ## Related Links
 - Low-cost airboat USVs(https://github.com/AdmiralCrow/HoverBoat)
 - Ushant AIS Public Dataset(https://github.com/rtavenar/ushant_ais)
