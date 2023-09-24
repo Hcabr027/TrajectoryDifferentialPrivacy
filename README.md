@@ -49,7 +49,7 @@ Both scripts do the following:
 - Outputs Charts to the 'out' directory
   
 ## Related Links
-- Low-cost airboat USVs(https://github.com/AdmiralCrow/HoverBoat)
+- Low-cost airboat USVs(https://github.com/AdmiralCrow/airboat_oceans_2023)
 - Ushant AIS Public Dataset(https://github.com/rtavenar/ushant_ais)
 
 ## License
